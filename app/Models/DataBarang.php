@@ -11,10 +11,16 @@ class DataBarang extends Model
 {
     use HasFactory, SoftDeletes;
     protected $table = 'data_barang';
+    protected $keyType = 'string';
 
     protected $fillable = [
-        'kode_barang', 'nama_barang', 'harga', 'stok',
-        'created_by', 'updated_by', 'deleted_by'
+        'kode_barang',
+        'nama_barang',
+        'harga',
+        'stok',
+        'created_by',
+        'updated_by',
+        'deleted_by'
     ];
 
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];

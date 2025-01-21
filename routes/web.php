@@ -5,22 +5,14 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\DataBarangController;
 use App\Http\Controllers\BarangMasukController;
 use App\Http\Controllers\BarangKeluarController;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
+use App\Http\Controllers\HomeController;
+use Illuminate\Support\Facades\Auth;
 
 Auth::routes();
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/', [HomeController::class, 'root'])->name('root');
+    Route::get('/index', [App\Http\Controllers\HomeController::class, 'root']);
     Route::get('/data-barang', [DataBarangController::class, 'index'])->name('data-barang');
     Route::post('/data-barang', [DataBarangController::class, 'store']);
     Route::put('/data-barang/update/{id}', [DataBarangController::class, 'update'])->name('data-barang.update');
@@ -38,9 +30,4 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/users', [UserController::class, 'index']);
 
-
-
-
-Route::get('/', [App\Http\Controllers\HomeController::class, 'root']);
-Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index'])->name('index');
-
+// Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index'])->name('index');

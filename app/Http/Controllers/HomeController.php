@@ -7,40 +7,67 @@ use App\Models\User;
 use App\Models\DataBarang;
 use App\Models\BarangMasuk;
 use App\Models\BarangKeluar;
+use Carbon\Carbon;
 
 class HomeController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    public function root(Request $request)
     {
-        $this->middleware('auth');
-    }
-
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
-    public function root()
-    {
+        // Hitung total user dan data barang
         $userCount = User::count();
         $dataBarangCount = DataBarang::count();
-        $barangMasukCount = BarangMasuk::count();
-        $barangKeluarCount = BarangKeluar::count();
-        return view('index', compact('userCount', 'dataBarangCount', 'barangMasukCount', 'barangKeluarCount'));
-    }
 
-    public function index(Request $request)
-    {
-        $userCount = User::count();
+        // Ambil daftar tahun dari tabel BarangMasuk dan BarangKeluar
+        $years = BarangMasuk::selectRaw('YEAR(tanggal) as year')
+            ->distinct()
+            ->union(
+                BarangKeluar::selectRaw('YEAR(tanggal) as year')->distinct()
+            )
+            ->orderByDesc('year')
+            ->pluck('year')
+            ->toArray();
 
-        if (view()->exists($request->path())) {
-            return view($request->path(), compact('userCount'));
+        // Gunakan tahun sekarang jika daftar tahun kosong
+        $currentYear = now()->year;
+        if (empty($years)) {
+            $years = [$currentYear];
         }
-        return view('errors.404');
+        $selectedYear = $request->input('year', max($years));
+        $selectedYear = in_array($selectedYear, $years) ? $selectedYear : max($years);
+
+        $selectedMonth = $request->input('month', now()->month);
+        $selectedMonth = is_numeric($selectedMonth) && $selectedMonth >= 1 && $selectedMonth <= 12
+            ? (int)$selectedMonth
+            : now()->month;
+
+        // Ambil data Barang Masuk dan Barang Keluar berdasarkan filter tahun dan bulan
+        $barangMasukMonthly = BarangMasuk::with('dataBarang')
+            ->whereYear('tanggal', $selectedYear)
+            ->whereMonth('tanggal', $selectedMonth)
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        $barangKeluarMonthly = BarangKeluar::with('dataBarang')
+            ->whereYear('tanggal', $selectedYear)
+            ->whereMonth('tanggal', $selectedMonth)
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        // Hitung total Barang Masuk dan Barang Keluar
+        $barangMasukCount = $barangMasukMonthly->count();
+        $barangKeluarCount = $barangKeluarMonthly->count();
+
+        // Kirim data ke view
+        return view('index', compact(
+            'userCount',
+            'dataBarangCount',
+            'barangMasukCount',
+            'barangKeluarCount',
+            'barangMasukMonthly',
+            'barangKeluarMonthly',
+            'selectedYear',
+            'selectedMonth',
+            'years'
+        ));
     }
 }

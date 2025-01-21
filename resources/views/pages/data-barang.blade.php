@@ -4,12 +4,16 @@
 @endsection
 @section('css')
     <!-- DataTables -->
-    <link href="{{ URL::asset('build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ URL::asset('build/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ URL::asset('build/libs/datatables.net-select-bs4/css//select.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ URL::asset('build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet"
+        type="text/css" />
+    <link href="{{ URL::asset('build/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css') }}" rel="stylesheet"
+        type="text/css" />
+    <link href="{{ URL::asset('build/libs/datatables.net-select-bs4/css//select.bootstrap4.min.css') }}" rel="stylesheet"
+        type="text/css" />
 
     <!-- Responsive datatable examples -->
-    <link href="{{ URL::asset('build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ URL::asset('build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}"
+        rel="stylesheet" type="text/css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
 @section('page-title')
@@ -41,40 +45,53 @@
                                     <th>Nama Barang</th>
                                     <th>Harga Barang</th>
                                     <th>Stok</th>
+                                    <th>Total Harga</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($data_barang as $barang)
-                                <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $barang->kode_barang }}</td>
-                                    <td>{{ $barang->nama_barang }}</td>
-                                    <td>Rp {{ number_format($barang->harga, 0, ',', '.') }}</td>
-                                    <td>{{ $barang->stok }}</td>
-                                    <td>
-                                        <button
-                                            class="px-2 text-primary border-0 bg-transparent"
-                                            title="Edit"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#editBarangModal"
-                                            data-id="{{ $barang->id }}"
-                                            data-kode="{{ $barang->kode_barang }}"
-                                            data-nama="{{ $barang->nama_barang }}"
-                                            data-harga="{{ $barang->harga }}"
-                                            data-stok="{{ $barang->stok }}">
-                                            <i class="ri-pencil-line font-size-18"></i>
-                                        </button>
-                                        <form action="{{ route('delete-barang', $barang->id) }}" method="POST" style="display:inline;" id="delete-form-{{ $barang->id }}">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="button" class="px-2 text-danger border-0 bg-transparent" title="Delete" onclick="confirmDelete({{ $barang->id }})">
-                                                <i class="ri-delete-bin-line font-size-18"></i>
+                                @php
+                                    $totalNilaiInventory = 0;
+                                @endphp
+                                @foreach ($data_barang as $barang)
+                                    @php
+                                        $totalHargaBarang = $barang->harga * $barang->stok;
+                                        $totalNilaiInventory += $totalHargaBarang;
+                                    @endphp
+                                    <tr>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $barang->kode_barang }}</td>
+                                        <td>{{ $barang->nama_barang }}</td>
+                                        <td>Rp {{ number_format($barang->harga, 0, ',', '.') }}</td>
+                                        <td>{{ $barang->stok }}</td>
+                                        <td>Rp {{ number_format($totalHargaBarang, 0, ',', '.') }}</td>
+                                        <td>
+                                            <button class="px-2 text-primary border-0 bg-transparent" title="Edit"
+                                                data-bs-toggle="modal" data-bs-target="#editBarangModal"
+                                                data-id="{{ $barang->id }}" data-kode="{{ $barang->kode_barang }}"
+                                                data-nama="{{ $barang->nama_barang }}" data-harga="{{ $barang->harga }}"
+                                                data-stok="{{ $barang->stok }}">
+                                                <i class="ri-pencil-line font-size-18"></i>
                                             </button>
-                                        </form>
-                                    </td>
-                                </tr>
+                                            <form action="{{ route('delete-barang', $barang->id) }}" method="POST"
+                                                style="display:inline;" id="delete-form-{{ $barang->id }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" class="px-2 text-danger border-0 bg-transparent"
+                                                    title="Delete" onclick="confirmDelete({{ $barang->id }})">
+                                                    <i class="ri-delete-bin-line font-size-18"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
                                 @endforeach
+                            <tfoot>
+                                <tr>
+                                    <th colspan="5" class="text-end">Total Nilai Inventory:</th>
+                                    <th>Rp {{ number_format($totalNilaiInventory, 0, ',', '.') }}</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
                             </tbody>
                         </table>
                     </div>
@@ -82,8 +99,7 @@
             </div> <!-- end col -->
         </div> <!-- end row -->
         <!-- Modal -->
-        <div class="modal fade" id="addBarangModal" tabindex="-1" aria-labelledby="addBarangModalLabel"
-            aria-hidden="true">
+        <div class="modal fade" id="addBarangModal" tabindex="-1" aria-labelledby="addBarangModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -96,19 +112,23 @@
                             @csrf
                             <div class="mb-3">
                                 <label for="kode_barang" class="form-label">Kode Barang</label>
-                                <input type="text" class="form-control" id="kode_barang" name="kode_barang" placeholder="Masukkan Kode Barang" required>
+                                <input type="text" class="form-control" id="kode_barang" name="kode_barang"
+                                    placeholder="Masukkan Kode Barang" required>
                             </div>
                             <div class="mb-3">
                                 <label for="nama_barang" class="form-label">Nama Barang</label>
-                                <input type="text" class="form-control" id="nama_barang" name="nama_barang" placeholder="Masukkan Nama Barang" required>
+                                <input type="text" class="form-control" id="nama_barang" name="nama_barang"
+                                    placeholder="Masukkan Nama Barang" required>
                             </div>
                             <div class="mb-3">
                                 <label for="harga_barang" class="form-label">Harga Barang</label>
-                                <input type="number" class="form-control" id="harga_barang" name="harga_barang" placeholder="Masukkan Harga Barang" required>
+                                <input type="number" class="form-control" id="harga_barang" name="harga_barang"
+                                    placeholder="Masukkan Harga Barang" required>
                             </div>
                             <div class="mb-3">
                                 <label for="stok_barang" class="form-label">Stok Barang</label>
-                                <input type="number" class="form-control" id="stok_barang" name="stok_barang" placeholder="Masukkan Stok Barang" required>
+                                <input type="number" class="form-control" id="stok_barang" name="stok_barang"
+                                    placeholder="Masukkan Stok Barang" required>
                             </div>
                     </div>
                     <!-- end modalbody -->
@@ -116,7 +136,7 @@
                         <button type="button" class="btn btn-light w-sm" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary w-sm">Add</button>
                     </div>
-                        </form>
+                    </form>
                     <!-- end modalfooter -->
                 </div><!-- end content -->
             </div>
@@ -203,29 +223,29 @@
         <script src="{{ URL::asset('build/js/app.js') }}"></script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-    const editBarangModal = document.getElementById('editBarangModal');
+                const editBarangModal = document.getElementById('editBarangModal');
 
-    editBarangModal.addEventListener('show.bs.modal', (event) => {
-        const button = event.relatedTarget;
+                editBarangModal.addEventListener('show.bs.modal', (event) => {
+                    const button = event.relatedTarget;
 
-        // Ambil data dari atribut data-*
-        const id = button.getAttribute('data-id');
-        const kode = button.getAttribute('data-kode');
-        const nama = button.getAttribute('data-nama');
-        const harga = button.getAttribute('data-harga');
-        const stok = button.getAttribute('data-stok');
+                    // Ambil data dari atribut data-*
+                    const id = button.getAttribute('data-id');
+                    const kode = button.getAttribute('data-kode');
+                    const nama = button.getAttribute('data-nama');
+                    const harga = button.getAttribute('data-harga');
+                    const stok = button.getAttribute('data-stok');
 
-        // Isi field modal dengan data yang sesuai
-        document.getElementById('edit_kode_barang').value = kode;
-        document.getElementById('edit_nama_barang').value = nama;
-        document.getElementById('edit_harga_barang').value = harga;
-        document.getElementById('edit_stok_barang').value = stok;
+                    // Isi field modal dengan data yang sesuai
+                    document.getElementById('edit_kode_barang').value = kode;
+                    document.getElementById('edit_nama_barang').value = nama;
+                    document.getElementById('edit_harga_barang').value = harga;
+                    document.getElementById('edit_stok_barang').value = stok;
 
-        // Atur action URL pada form untuk update
-        const form = document.getElementById('editBarangForm');
-        form.action = `/data-barang/update/${id}`;
-    });
-});
+                    // Atur action URL pada form untuk update
+                    const form = document.getElementById('editBarangForm');
+                    form.action = `/data-barang/update/${id}`;
+                });
+            });
 
 
             function confirmDelete(id) {

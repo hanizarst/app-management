@@ -21,10 +21,15 @@ class BarangKeluar extends Model
         'deleted_by',
     ];
 
+    // Explicitly cast dates
+    protected $casts = [
+        'tanggal' => 'datetime',
+    ];
+
+    protected $dates = ['tanggal', 'created_at', 'updated_at', 'deleted_at'];
+
     public function dataBarang()
     {
         return $this->belongsTo(DataBarang::class, 'data_barang_id');
     }
-
-    protected $dates = ['tanggal', 'created_at', 'updated_at', 'deleted_at'];
 }

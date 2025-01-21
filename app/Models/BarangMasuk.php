@@ -20,7 +20,12 @@ class BarangMasuk extends Model
         'deleted_by',
     ];
 
-    protected $dates = ['created_at', 'updated_at', 'deleted_at'];
+    protected $dates = ['tanggal', 'created_at', 'updated_at', 'deleted_at'];
+
+    // Explicitly cast dates
+    protected $casts = [
+        'tanggal' => 'datetime',
+    ];
 
     public function dataBarang()
     {

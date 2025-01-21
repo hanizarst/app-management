@@ -3,7 +3,7 @@
 
     <!-- LOGO -->
     <div class="navbar-brand-box">
-        <a href="index" class="logo logo-dark">
+        <a href="/" class="logo logo-dark">
             <span class="logo-sm">
                 <img src="{{ URL::asset('build/images/logo-sm-dark.png') }}" alt="logo-sm-dark" height="24">
             </span>
@@ -12,7 +12,7 @@
             </span>
         </a>
 
-        <a href="index" class="logo logo-light">
+        <a href="/" class="logo logo-light">
             <span class="logo-sm">
                 <img src="{{ URL::asset('build/images/logo-sm-light.png') }}" alt="logo-sm-light" height="24">
             </span>
@@ -38,8 +38,8 @@
                 <li class="menu-title">Menu</li>
 
                 <li>
-                    <a href="/" class="waves-effect">
-                        <i class="uim uim-airplay"></i><span class="float-end">></span>
+                    <a href="index" class="waves-effect">
+                        <i class="ri-dashboard-line"></i><span class="float-end">></span>
                         <span>Dashboard</span>
                     </a>
                 </li>
@@ -81,8 +81,8 @@
     </div>
 
     <div class="dropdown px-3 sidebar-user sidebar-user-info">
-        <button type="button" class="btn w-100 px-0 border-0" id="page-header-user-dropdown"
-            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <button type="button" class="btn w-100 px-0 border-0" id="page-header-user-dropdown" data-bs-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
             <span class="d-flex align-items-center">
                 <div class="flex-shrink-0">
                     <img src="{{ URL::asset('build/images/users/default.jpg') }}"
